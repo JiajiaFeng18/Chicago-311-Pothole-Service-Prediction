@@ -1,0 +1,78 @@
+community_area_id,community_area_name,region_id,region_name
+1,ROGERS PARK,1,Rogers Park - West Ridge
+2,WEST RIDGE,1,Rogers Park - West Ridge
+3,UPTOWN,4,Edge Water-Uptown
+4,LINCOLN SQUARE,3,North Park-Albany-Linconl Sq
+5,NORTH CENTER,6,Irving Park-Avondale-North Ctr
+6,LAKE VIEW,8,Lincoln Park-Lake View
+7,LINCOLN PARK,8,Lincoln Park-Lake View
+8,NEAR NORTH SIDE,12,Near North
+9,EDISON PARK,2,Far North West
+10,NORWOOD PARK,2,Far North West
+11,JEFFERSON PARK,2,Far North West
+12,FOREST GLEN,2,Far North West
+13,NORTH PARK,3,North Park-Albany-Linconl Sq
+14,ALBANY PARK,3,North Park-Albany-Linconl Sq
+15,PORTAGE PARK,5,Dunning-Portage-Belmont Cragn
+16,IRVING PARK,6,Irving Park-Avondale-North Ctr
+17,DUNNING,5,Dunning-Portage-Belmont Cragn
+18,MONTCLARE,5,Dunning-Portage-Belmont Cragn
+19,BELMONT CRAGIN,5,Dunning-Portage-Belmont Cragn
+20,HERMOSA,7,Hermosa-Logan Square
+21,AVONDALE,6,Irving Park-Avondale-North Ctr
+22,LOGAN SQUARE,7,Hermosa-Logan Square
+23,HUMBOLDT PARK,10,Humboldt-Garfield Prk E/W
+24,WEST TOWN,11,West Town-Near West
+25,AUSTIN,9,Austin
+26,WEST GARFIELD PARK,10,Humboldt-Garfield Prk E/W
+27,EAST GARFIELD PARK,10,Humboldt-Garfield Prk E/W
+28,NEAR WEST SIDE,11,West Town-Near West
+29,NORTH LAWNDALE,14,Lawndale N/S
+30,SOUTH LAWNDALE,14,Lawndale N/S
+31,LOWER WEST SIDE,15,Bridgeport-McKinley-Lower West
+32,LOOP,13,Chicago Loop
+33,NEAR SOUTH SIDE,16,Near South-Douglas
+34,ARMOUR SQUARE,16,Near South-Douglas
+35,DOUGLAS,16,Near South-Douglas
+36,OAKLAND,16,Near South-Douglas
+37,FULLER PARK,20,Fuller-Grand Blvd-Washington Park
+38,GRAND BOULEVARD,20,Fuller-Grand Blvd-Washington Park
+39,KENWOOD,21,Hyde Park-Kenwood-Woodlawn
+40,WASHINGTON PARK,20,Fuller-Grand Blvd-Washington Park
+41,HYDE PARK,21,Hyde Park-Kenwood-Woodlawn
+42,WOODLAWN,21,Hyde Park-Kenwood-Woodlawn
+43,SOUTH SHORE,24,South Shore-S Chicago-Avlon
+44,CHATHAM,23,Auburn Gresham-Chatham
+45,AVALON PARK,24,South Shore-S Chicago-Avlon
+46,SOUTH CHICAGO,24,South Shore-S Chicago-Avlon
+47,BURNSIDE,24,South Shore-S Chicago-Avlon
+48,CALUMET HEIGHTS,24,South Shore-S Chicago-Avlon
+49,ROSELAND,26,Washington Hts-Roseland-Pullman
+50,PULLMAN,26,Washington Hts-Roseland-Pullman
+51,SOUTH DEERING,27,South Deering-East Side
+52,EAST SIDE,27,South Deering-East Side
+53,WEST PULLMAN,26,Washington Hts-Roseland-Pullman
+54,RIVERDALE,28,Riverdale-Hegewisch
+55,HEGEWISCH,28,Riverdale-Hegewisch
+56,GARFIELD RIDGE,17,Midway-Garfield Rdg-Clearing
+57,ARCHER HEIGHTS,15,Bridgeport-McKinley-Lower West
+58,BRIGHTON PARK,15,Bridgeport-McKinley-Lower West
+59,MCKINLEY PARK,15,Bridgeport-McKinley-Lower West
+60,BRIDGEPORT,15,Bridgeport-McKinley-Lower West
+61,NEW CITY,19,New City-Englewood-W Englewood
+62,WEST ELSDON,17,Midway-Garfield Rdg-Clearing
+63,GAGE PARK,17,Midway-Garfield Rdg-Clearing
+64,CLEARING,17,Midway-Garfield Rdg-Clearing
+65,WEST LAWN,22,Ashburn
+66,CHICAGO LAWN,22,Ashburn
+67,WEST ENGLEWOOD,19,New City-Englewood-W Englewood
+68,ENGLEWOOD,19,New City-Englewood-W Englewood
+69,GREATER GRAND CROSSING,21,Hyde Park-Kenwood-Woodlawn
+70,ASHBURN,22,Ashburn
+71,AUBURN GRESHAM,23,Auburn Gresham-Chatham
+72,BEVERLY,25,Beverly-Mt Greenwood-Morgan Park
+73,WASHINGTON HEIGHTS,26,Washington Hts-Roseland-Pullman
+74,MOUNT GREENWOOD,25,Beverly-Mt Greenwood-Morgan Park
+75,MORGAN PARK,25,Beverly-Mt Greenwood-Morgan Park
+76,OHARE,2,Far North West
+77,EDGEWATER,4,Edge Water-Uptown

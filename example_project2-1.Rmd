@@ -1,0 +1,335 @@
+---
+title: "Project 2 Example Notebook - R Version"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Loading necessary packages
+
+```{r load-packages}
+# Install packages if needed (run once):
+# install.packages(c("tidyverse", "randomForest", "caret", "pROC", "lubridate"))
+
+library(tidyverse)      # For data manipulation (dplyr, ggplot2, etc.)
+library(randomForest)   # For Random Forest model
+library(caret)          # For train/test split and model evaluation
+library(pROC)           # For AUC/ROC calculations
+library(lubridate)      # For date handling
+```
+
+### Notebook Purpose
+
+This notebook covers the basic skills needed for Project 2
+
+1. Ingest csv data
+2. Basic data processing
+3. Train model
+4. Assess model on known labels
+5. Score test rows
+
+## Core data processing
+
+```{r load-data}
+# Load training data
+df_train <- read_csv('train.csv')
+df_train <- df_train %>%
+  mutate(zip = as.character(zip))
+head(df_train)
+```
+
+```{r load-test-data}
+# Load test data
+df_test <- read_csv('test.csv')
+head(df_test)
+```
+
+```{r bind-data}
+# Bind test + train for consistent processing
+df_full <- bind_rows(df_train,df_test)
+head(df_full)
+```
+
+### Data type conversions
+
+```{r convert-dates}
+# Convert creation_date to Date type
+df_full$creation_date <- as.Date(df_full$creation_date)
+
+# Check column types, this is the "structure" function. So helpful!!
+str(df_full)
+```
+
+```{r convert-zip}
+# Convert zip codes from float to character, we don't want a model to treat these as a continuous variable
+df_full$zip <- as.character(as.integer(df_full$zip))
+```
+
+### Load and merge additional datasets
+
+```{r load-census}
+# Load census data (example)
+df_census <- read_csv('community_acs.csv')
+head(df_census)
+```
+
+```{r load-congestion}
+# Load speed data (example)
+df_congestion <- read_csv('congestion_region.csv')
+head(df_congestion)
+```
+```{r load-xwalk}
+# Load speed data (example)
+df_crosswalk <- read_csv('community_region_crosswalk.csv')
+head(df_crosswalk)
+```
+
+
+```{r merge-data}
+# Merge datasets using left_join (equivalent to pd.merge with how='left')
+df_full_wide <- df_full %>%
+  left_join(df_crosswalk, by = c("community_area" = "community_area_id"))
+
+df_full_wide <- df_full_wide %>%
+  left_join(df_census, by = c("community_area_name" = "community_area")) %>%
+  left_join(df_congestion, by = "region_id")
+
+# Check merged data
+head(df_full_wide)
+```
+
+```{r remove-test-rows}
+# Pulling the test rows (that don't have labels) out of the table for later scoring
+df_test_wide <- df_full_wide %>% filter(is.na(completed_within_7_days))
+df_train_wide <- df_full_wide %>% filter(!is.na(completed_within_7_days))
+
+# Check split data 
+dim(df_test_wide)
+dim(df_train_wide)
+```
+
+## Train/Test Split and Model Preparation
+
+```{r train-columns}
+colnames(df_train_wide)
+```
+
+
+```{r define-columns-to-drop}
+# Define columns to drop (ID columns, target variable, etc.)
+drop_cols <- c('latitude', 'longitude', 'current_activity', 'completed_within_7_days', 'request_id', 'region_id')
+
+# Create feature matrix X and target vector y
+X_train_full <- df_train_wide %>% select(-all_of(drop_cols))
+y_train_full <- df_train_wide$completed_within_7_days
+
+# Convert y to factor for classification
+y_train_full <- as.factor(y_train_full)
+```
+
+```{r train-test-split}
+# Set seed for reproducibility
+set.seed(213)
+
+# Create train/test split (80/20)
+# In R, we'll use caret's createDataPartition
+train_index <- createDataPartition(y_train_full, p = 0.8, list = FALSE)
+
+X_train <- X_train_full[train_index, ]
+X_test <- X_train_full[-train_index, ]
+y_train <- y_train_full[train_index]
+y_test <- y_train_full[-train_index]
+
+# Check dimensions
+cat("Training set:", nrow(X_train), "rows\n")
+cat("Test set:", nrow(X_test), "rows\n")
+```
+
+```{r handle-missing-values}
+# Handle missing values (simple approach: replace with median/mode or remove)
+# For numeric columns, replace NA with median
+X_train <- X_train %>%
+  mutate(across(where(is.numeric), ~replace_na(., median(., na.rm = TRUE))))
+
+X_test <- X_test %>%
+  mutate(across(where(is.numeric), ~replace_na(., median(., na.rm = TRUE))))
+
+# For character columns, replace NA with "Unknown"
+X_train <- X_train %>%
+  mutate(across(where(is.character), ~replace_na(., "Unknown")))
+
+X_test <- X_test %>%
+  mutate(across(where(is.character), ~replace_na(., "Unknown")))
+```
+
+## Train Random Forest Model
+
+```{r train-model}
+# Create and train the Random Forest model
+# Random Forest takes almost any column type, this is your warning to check 
+# your column types and distributions for other algorithms
+
+rf_model <- randomForest(
+  x = X_train,
+  y = y_train,
+  ntree = 100,        # Number of trees (equivalent to n_estimators)
+  maxnodes = 10,      # Maximum number of terminal nodes (similar to max_depth)
+  importance = TRUE   # Calculate feature importance
+)
+
+# Print model summary
+print(rf_model)
+```
+
+## Model Evaluation
+
+```{r make-predictions}
+# Make predictions on test set
+y_pred_rf <- predict(rf_model, X_test, type = "class")
+
+# Get probability predictions for AUC calculation
+y_pred_proba_rf <- predict(rf_model, X_test, type = "prob")[, 2]
+```
+
+```{r calculate-metrics}
+# Calculate AUC
+roc_obj <- roc(y_test, y_pred_proba_rf)
+auc_rf <- auc(roc_obj)
+
+# Calculate accuracy
+accuracy_rf <- sum(y_pred_rf == y_test) / length(y_test)
+
+# Print metrics
+cat("\nAUC:", round(auc_rf, 4), "\n")
+cat("Accuracy:", round(accuracy_rf, 4), "\n")
+```
+
+```{r confusion-matrix}
+# Create confusion matrix using caret
+conf_matrix <- confusionMatrix(y_pred_rf, y_test)
+print(conf_matrix)
+```
+
+```{r classification-report}
+# Print detailed classification report
+cat("\nClassification Report:\n")
+print(conf_matrix$byClass)
+```
+
+```{r feature-importance}
+# View feature importance
+importance_df <- as.data.frame(importance(rf_model))
+importance_df$feature <- rownames(importance_df)
+
+# Sort by MeanDecreaseGini and show top 10
+importance_df %>%
+  arrange(desc(MeanDecreaseGini)) %>%
+  select(feature, MeanDecreaseGini) %>%
+  head(10)
+```
+
+```{r plot-roc-curve}
+# Plot ROC curve
+plot(roc_obj, main = paste("ROC Curve - Random Forest (AUC =", round(auc_rf, 4), ")"))
+```
+
+## Scoring Test Rows
+
+```{r prepare-test-data}
+# Prepare test data for scoring (drop same columns as training)
+df_test_scoring <- df_test_wide %>% select(-all_of(drop_cols))
+
+# Handle missing values in test data (same as training)
+df_test_scoring <- df_test_scoring %>%
+  mutate(across(where(is.numeric), ~replace_na(., median(., na.rm = TRUE))))
+
+df_test_scoring <- df_test_scoring %>%
+  mutate(across(where(is.character), ~replace_na(., "Unknown")))
+```
+
+```{r make-test-predictions}
+# Make predictions on test data
+test_predictions <- predict(rf_model, df_test_scoring, type = "prob")
+
+# Create predictions dataframe
+test_predictions_df <- data.frame(
+  request_id = df_test_wide$request_id,
+  prediction = as.numeric(as.character(test_predictions))
+)
+
+head(test_predictions_df)
+```
+
+```{r save-predictions}
+# Save predictions to CSV
+write_csv(test_predictions_df, 'test_predictions.csv')
+```
+
+## Additional Useful R Functions for Data Processing
+
+```{r additional-examples, eval=FALSE}
+# These are examples of common operations you might need:
+
+# Filter data by column value
+df_filtered <- df_train %>% filter(ward == 41)
+
+# Count rows by year
+df_train %>%
+  mutate(year = year(creation_date)) %>%
+  count(year)
+
+# Remove duplicates (keep most recent by date)
+df_deduped <- df_train %>%
+  arrange(desc(creation_date)) %>%
+  distinct(request_id, .keep_all = TRUE)
+
+# Combine datasets (append rows)
+df_combined <- bind_rows(df1, df2)
+
+# Add a unique ID column
+df_train$ID <- 1:nrow(df_train)
+
+# Select only specific columns
+df_subset <- df_train %>% select(request_id, creation_date, ward)
+
+# Group by and summarize
+df_summary <- df_train %>%
+  group_by(ward) %>%
+  summarize(
+    count = n(),
+    avg_potholes = mean(number_of_potholes_filled_on_block, na.rm = TRUE)
+  )
+
+# Split data based on NULL values
+df_null <- df_train %>% filter(is.na(ssa))
+df_not_null <- df_train %>% filter(!is.na(ssa))
+
+# Round numeric columns
+df_train <- df_train %>%
+  mutate(
+    latitude = round(latitude, 3),
+    longitude = round(longitude, 3)
+  )
+
+# Convert column types
+df_train <- df_train %>%
+  mutate(
+    ward = as.integer(ward),
+    zip = as.character(zip),
+    creation_date = as.Date(creation_date)
+  )
+
+# Check for missing values
+colSums(is.na(df_train))
+
+# Display all columns when printing
+options(tibble.width = Inf)
+options(tibble.print_max = Inf)
+```
+
+---
+
+Good luck! Reach out to Professor Cooman or Maura for help. Start early!!
